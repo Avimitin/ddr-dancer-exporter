@@ -6,7 +6,7 @@ Convert a rigged model into a DDR dancer package, compare its moves with a refer
 
 **Import → Credit → Convert → Preview → Install**
 
-[Get started](docs/SETUP.md) · [Conversion guide](docs/CONVERTING.md) · [Format limits](docs/TECHNICAL.md) · [Browser version proposal](docs/STATIC-FRONTEND.md)
+[Get started](docs/SETUP.md) · [Conversion guide](docs/CONVERTING.md) · [Troubleshooting](docs/TECHNICAL.md#troubleshooting)
 
 ## Choose your starting point
 
@@ -24,7 +24,7 @@ ZIP/RAR downloads must be extracted first. Keep the model's textures and origina
 
 Follow the [one-time setup](docs/SETUP.md), then create a local dancer folder with its model, configuration, and credits. The [conversion guide](docs/CONVERTING.md#create-a-local-dancer) includes a configuration you can copy.
 
-Models, DDR reference assets, animations, and generated videos are **not included** in this repository. Everything under `dancers/` stays local, including configuration files and credits.
+Supply your own model, DDR reference assets, and animations as described in the setup guide.
 
 ### 2. Import your model
 
@@ -79,8 +79,6 @@ Keep `chara_resources.rlist.txt`, the model subfolder, and the **借物表** tog
 
 ## What to expect
 
-This is an experimental converter. Arm alignment and twist weights are fitted to DDR, but broad bodies and wings can still intersect. Cloth physics and facial animation are not transferred. The preview is an approximation; successful export is not proof of correct in-game behavior.
+This is an experimental converter. Some models may have clipping or distorted poses. Cloth physics and facial animation are not transferred. Check your model in the preview and test it in-game after installation.
 
-The current converter runs locally with Python and, for `.blend`, Blender. A drag-and-drop browser converter is [a proposed next step](docs/STATIC-FRONTEND.md), not an existing feature.
-
-For implementation details, testing, and troubleshooting, start with the [documentation index](docs/README.md).
+For help with conversion errors or unexpected results, see [troubleshooting](docs/TECHNICAL.md#troubleshooting).
