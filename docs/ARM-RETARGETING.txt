@@ -1,0 +1,38 @@
+Arm correction applied to converted exports
+==========================================
+Affected: Ano, Nailong, Adelie Tomorin. Original Miku and stock Emi are unchanged.
+
+The exporter now aligns each arm chain from its actual source rest frame to
+DDR's collar, shoulder, elbow and wrist anchors. Bone-axis length is adjusted
+without uniformly shrinking the arm/wing cross-section. Vertex corrections
+are blended using the skin weights; normals use the inverse-transpose of the
+same correction. All output still uses the 33-bone DDR rig and nine packets.
+
+Ano's imported arm/wrist twist and auxiliary forearm groups now map to DDR
+ArmRoll/ForeArmRoll. Nailong and Tomorin get a gradual spatial split between
+main and roll bones. KTMDL's four-influence limit is enforced by retaining the
+four largest weights and renormalizing. arm-retarget.json records the maximum
+discarded weight and actual roll weight totals per model.
+
+Validation: binary decode and DDS validation for all three models; 65 HT01
+poses per model before/after; arm joint endpoint/direction checks; handedness;
+finite positions and normals. validation.json records quantitative comparisons.
+ht01-before-after.jpg shows actual old versus new exported KTMDL geometry at
+0 and 16 seconds. The videos in the main viewer are rebuilt from new exports.
+
+Residual limitations: the torso/legs keep their original proportional fitting.
+Broad bodies and wings can still overlap in lowered-arm poses. There is no
+collision solver, cloth/wing physics, or finger animation. This fixes the
+incorrect arm bind frame and missing roll-weight distribution; it does not
+provide perfect full-body retargeting for arbitrary nonhuman anatomy.
+Actual DDR loading/rendering remains untested.
+
+Previous outputs, intermediates and MP4s are preserved in:
+  backups/before-arm-fix/dancers/<model>/
+
+Rebuild:
+  Blender inputs: import_blend.py, then compare_ddr.py (with --dancer)
+  export_ddr.py --dancer <id>
+  validate_export.py --dancer <id>
+  build_previews.py --dancer <id> --all
+  scripts/diagnostics/check_arm_fix.py compares to the preserved before-arm-fix baseline.

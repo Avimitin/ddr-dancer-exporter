@@ -1,0 +1,50 @@
+# Python environments and generated caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.nbc
+*.nbi
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+/build/
+/dist/
+
+# Local model/game assets and generated work; retain configurations and credits
+/dancers/*/*
+!/dancers/*/dancer.json
+!/dancers/*/bone-map.json
+!/dancers/*/借物表.txt
+/animations/
+/analysis/
+/backups/
+
+# Generated catalogs, screenshots, reports and media
+/preview/*
+!/preview/index.html
+!/preview/viewer.js
+!/preview/viewer.css
+
+# Portable tools and downloads; retain vendored parsers and licenses
+/tools/*
+!/tools/anm.py
+!/tools/ktmdl.py
+!/tools/lz77.py
+!/tools/LICENSE.upstream
+!/tools/LICENSE.bemaniutils
+!/tools/UPSTREAM.txt
+!/tools/provenance.json
+
+# Local settings and operating-system files
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.log

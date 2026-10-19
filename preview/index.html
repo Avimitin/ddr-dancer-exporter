@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DDR Dancer Exporter · Motion comparison</title>
+<link rel="stylesheet" href="viewer.css">
+<script src="manifest.js" defer></script><script src="viewer.js" defer></script>
+</head>
+<body>
+<main>
+  <header class="masthead"><div><div class="eyebrow"><span class="mark">↗</span> DDR DANCER EXPORTER</div><h1>Same motion. Different dancer.</h1><p>Compare a converted model against the original, frame by frame.</p></div><span class="badge">OFFLINE PREVIEW</span></header>
+  <section class="toolbar" aria-label="Preview settings">
+    <div class="field"><label for="dancer">Comparison dancer</label><select id="dancer" disabled></select></div>
+    <div class="field"><label for="animation">Animation</label><select id="animation" disabled></select></div>
+    <div class="motion-detail"><span id="clipInfo">Loading library…</span><span class="subtle">Matched camera &amp; timeline</span></div>
+    <div class="field speed"><label for="speed">Playback speed</label><select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option><option value="2">2×</option></select></div>
+  </section>
+  <section class="comparison" aria-label="Dancer comparison">
+    <article class="dancer-card"><div class="card-title"><div><span class="overline">REFERENCE</span><h2 id="stockName">Stock dancer</h2></div><span class="pill">Stock DDR</span></div><div class="stage"><video id="stock" muted playsinline preload="auto" aria-label="Stock dancer preview"></video><span class="ground-label">GROUND · Y = 0</span></div><div class="credits"><span>Source</span><p id="stockCredit"></p></div></article>
+    <article class="dancer-card converted"><div class="card-title"><div><span id="comparisonRole" class="overline">CONVERTED</span><h2 id="convertedName">Converted dancer</h2></div><span id="convertedKind" class="pill accent">PMX → DDR</span></div><div class="stage"><video id="converted" muted playsinline preload="auto" aria-label="Converted dancer preview"></video><span class="ground-label">GROUND · Y = 0</span></div><div class="credits"><span lang="zh">借物表</span><p id="convertedCredit"></p></div></article>
+  </section>
+  <section class="transport" aria-label="Synchronized playback">
+    <div class="timeline"><label for="seek" class="sr-only">Seek both dancers</label><input id="seek" type="range" min="0" max="1000" value="0" step="1" disabled><output id="time">00:00.00 / 00:00.00</output></div>
+    <div class="buttons"><button id="play" class="primary" disabled>Play both</button><button id="restart" disabled aria-label="Restart both dancers">↺ Restart</button><div class="frame-controls"><button id="previous" disabled aria-label="Previous frame">←</button><span>Frame</span><button id="next" disabled aria-label="Next frame">→</button></div><label class="loop"><input id="loop" type="checkbox" checked> Loop</label><span id="status" role="status" aria-live="polite">Preparing comparison…</span></div>
+  </section>
+  <footer><p><strong>What to look for</strong> Wing bends, torso folds, intersections, and feet passing below the ground line.</p><details><summary>About these previews</summary><p id="notes"></p><p>Lighting and alpha handling approximate the assets. These videos do not establish that a model loads or renders correctly inside DDR. Original motion sample rate is assumed to be 60 Hz.</p><p>Every converted input model requires a non-empty <span lang="zh">借物表</span>. Credits come from that dancer’s configuration and are also included with its exported files.</p></details><span class="shortcut">SPACE play/pause · ← / → step one frame</span></footer>
+</main>
+<noscript>This comparison viewer requires JavaScript. The MP4 files can also be played directly from each dancer’s preview/mp4 folder.</noscript>
+</body></html>

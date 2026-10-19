@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/moth1995/pes2008-2013-tools",
+  "main_commit_at_inspection": "0a0284fc9127beca45397ba7009883af2f2be6fd",
+  "files": {
+    "anm.py": "50d0f4b50324d2ecbe55ab8aecc25121d6803e1f94e7a98d255a8ef1ce1103b2",
+    "ktmdl.py": "6dc2e924e9df136d72476343a0fd27feccac099fcdeb317ec9bcc49522d8ca63",
+    "LICENSE.upstream": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+  }
+}

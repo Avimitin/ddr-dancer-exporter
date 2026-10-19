@@ -1,0 +1,16 @@
+Third-party parsers: ktmdl.py and anm.py
+Source: https://github.com/moth1995/pes2008-2013-tools
+Author/repository owner: moth1995
+Downloaded from main on 2026-10-19.
+License: GPL-3.0-or-later; see LICENSE.upstream and script SPDX headers.
+The exporter and preview use these parsers. The original game/model assets
+have separate rights and are not covered by the parser's GPL license.
+
+Local DDR extension is implemented in scripts/preview_motion.py:
+curve 0x001e is decoded as half-float XYZ translation. Upstream files are
+kept unchanged. Camera decoding is local and is labelled as inferred.
+
+Source commits and downloaded-file hashes are recorded in provenance.json.
+
+ARC LZ77 decoder: https://github.com/DragonMinded/bemaniutils/blob/trunk/bemani/protocol/lz77.py
+License: Unlicense (LICENSE.bemaniutils). Downloaded 2026-10-20. Local adaptation replaces package-relative package_root import with the containing directory.

@@ -1,0 +1,13 @@
+{
+  "id": "nailong",
+  "label": "Nailong / 奶龙",
+  "kind": "converted",
+  "input_type": "blend",
+  "credits": "bingloe（AIGC / AI-generated）",
+  "credit_provenance": "bingloe from supplied archive byline; AIGC status confirmed by user",
+  "template": "template-miku",
+  "package_name": "Nailong",
+  "model_id": "nailong00",
+  "arm_retarget": true,
+  "arm_twist_weights": "spatial"
+}

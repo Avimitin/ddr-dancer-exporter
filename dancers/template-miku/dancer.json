@@ -1,0 +1,10 @@
+{
+  "id": "template-miku",
+  "label": "Hatsune Miku (original custom mod)",
+  "kind": "template",
+  "model": "model/pl_miku00.model",
+  "model_id": "miku00",
+  "preview_kind": "Original DDR custom mod",
+  "credits": "Hatsune Miku custom mod — model/mod author not identified in supplied folder",
+  "credit_provenance": "The installed custom mod folder contains model files and registration only; no author/readme was supplied. This is the original reference, not a new conversion."
+}
