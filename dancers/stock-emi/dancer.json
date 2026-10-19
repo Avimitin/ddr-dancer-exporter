@@ -1,7 +1,0 @@
-{
-  "id": "stock-emi",
-  "label": "Emi",
-  "kind": "stock",
-  "model": "model/pl_emi00.model",
-  "source": "DDR pl_emi00.arc"
-}

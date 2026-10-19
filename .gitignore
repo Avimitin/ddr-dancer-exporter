@@ -13,11 +13,8 @@ htmlcov/
 /build/
 /dist/
 
-# Local model/game assets and generated work; retain configurations and credits
-/dancers/*/*
-!/dancers/*/dancer.json
-!/dancers/*/bone-map.json
-!/dancers/*/借物表.txt
+# Local models, configurations, credits and generated per-dancer work
+/dancers/
 /animations/
 /analysis/
 /backups/

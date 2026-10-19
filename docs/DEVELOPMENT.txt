@@ -8,7 +8,7 @@ scripts/legacy/           Disabled historical workspace migrations
 tests/                    Credit and browser regression checks
 tools/                    Vendored parsers, upstream provenance and licenses
 preview/                  Static offline comparison UI
-dancers/<id>/             Tracked configuration, bone map and credit sidecar
+dancers/<id>/             Ignored local configuration, credits and model work
 
 Commands run directly from the project directory with the local venv.
 Entry-point _bootstrap.py modules find src/ relative to their own file, so
@@ -20,22 +20,25 @@ Git excludes source models/textures, stock/template assets, game animations,
 analysis dumps, export packages, MP4s, screenshots, generated preview manifests,
 backups, Python environments, portable Blender and downloaded research files.
 These files remain on disk. A fresh clone is a source-code checkout; it needs
-locally supplied assets in the paths described in README.txt before rendering
+locally supplied assets in the paths described in docs/SETUP.md before rendering
 or integration tests can run. No model/game assets are bundled in the commit.
 
 Validation (from project root)
 ==============================
 .venv/Scripts/python.exe -m compileall -q src scripts tests
-.venv/Scripts/python.exe tests/test_credits.py
-.venv/Scripts/python.exe scripts/validate_export.py --dancer ano
+.venv/Scripts/python.exe tests/test_credits.py --dancer my-dancer
+.venv/Scripts/python.exe scripts/validate_export.py --dancer my-dancer
 .venv/Scripts/python.exe scripts/catalog.py
 .venv/Scripts/python.exe tests/test_viewer.py
 .venv/Scripts/python.exe scripts/diagnostics/check_arm_fix.py
 
-The final command compares current exports with the preserved local
-backups/before-arm-fix baseline. Browser tests require Playwright Chromium
+Replace my-dancer with a configured local dancer ID. All dancer profiles,
+bone maps and credit sidecars are local and excluded from Git.
+The final command uses the historical local dancer profiles and compares
+their exports with the preserved local backups/before-arm-fix baseline;
+these fixtures are not bundled. Browser tests require Playwright Chromium
 and all local preview MP4s. Blender import/inspection commands must use
---disable-autoexec and --python-exit-code 1; see README.txt.
+--disable-autoexec and --python-exit-code 1; see docs/CONVERTING.md.
 
 Git checks
 ==========
