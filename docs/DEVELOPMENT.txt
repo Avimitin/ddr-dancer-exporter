@@ -1,5 +1,9 @@
 Code organization
 =================
+web/                      Static browser application and conversion library
+web/lib/adapters.js       Format registry and common import boundary
+service/                  Optional bridge hosted by Blender's embedded Python
+Launch.ps1                Always opens static page; starts optional backend
 src/ddr_dancer_exporter/   Shared paths, motion decoding, rendering, catalog,
                           and arm retargeting implementation
 scripts/                  Direct Python/Blender command entry points
@@ -10,7 +14,8 @@ tools/                    Vendored parsers, upstream provenance and licenses
 preview/                  Static offline comparison UI
 dancers/<id>/             Ignored local configuration, credits and model work
 
-Commands run directly from the project directory with the local venv.
+Frontend build/release: see docs/LOCAL-SERVICE.md (Node.js is build-time only).
+The following legacy Python commands run from the project directory with the local venv.
 Entry-point _bootstrap.py modules find src/ relative to their own file, so
 an editable install and PYTHONPATH configuration are unnecessary.
 

@@ -1,5 +1,10 @@
 # Technical reference
 
+The default release uses the static browser converter and optional Blender
+backend. See [the adapter/service reference](LOCAL-SERVICE.md). The Python
+commands and MP4 rendering details below describe the retained desktop tools.
+Both export paths target the same DDR template and arm correction rules.
+
 ## Export backend
 
 The writer rebuilds KTMDL geometry using the local `template-miku/model/pl_miku00.model` layout. It retains the reference's 33-bone rig, inverse-bind matrices, shader identifiers, texture names, and nine packet slots. It is not a general writer for arbitrary DDR templates.

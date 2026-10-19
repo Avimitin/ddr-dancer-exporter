@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>DDR Dancer Exporter</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.bundle.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <div class="brand">DDR / DANCER EXPORTER</div>
+      <span id="connection" class="badge">PMX · browser conversion</span>
+    </header>
+    <main>
+      <section class="intro">
+        <p class="eyebrow">YOUR MODEL. THE DDR DANCE FLOOR.</p>
+        <h1>Give your dancer<br />a new stage.</h1>
+        <p>
+          Drop a model, add its credits, and download a DDR dancer package.<br />Files stay on your
+          computer.
+        </p>
+      </section>
+      <div class="workspace">
+        <section class="card setup">
+          <h2><span>01</span> Add your DDR reference files</h2>
+          <p>
+            Choose the Hatsune Miku custom-mod folder used as the export template. Add stock Emi and
+            animation files for comparison.
+          </p>
+          <div class="actions">
+            <label class="button secondary"
+              >Choose folder<input
+                id="assets-folder"
+                type="file"
+                webkitdirectory
+                multiple
+                hidden /></label
+            ><label class="button secondary"
+              >Choose files / ZIP<input id="assets" type="file" multiple hidden
+            /></label>
+          </div>
+          <p id="asset-status" class="muted">
+            Template required: pl_miku00.model, .b2it, .grp2it and its DDS textures.
+          </p>
+          <details>
+            <summary>Where are these files?</summary>
+            <p>
+              Use your own files from DDR’s custom models and background dancers. You can add
+              folders separately. Supported animation archives: mc_female.arc and mc_bpm120.arc.
+              Stock reference: pl_emi00.arc and pl_emi00_face01.arc. Game and model assets are not
+              included.
+            </p>
+          </details>
+        </section>
+        <section class="card input">
+          <h2><span>02</span> Bring your model</h2>
+          <label id="drop" class="drop" tabindex="0"
+            ><strong>Drop your model files here</strong
+            ><span>PMX, Blender, or a ZIP with textures</span
+            ><small>Click to choose files · RAR must be extracted first</small
+            ><input id="models" type="file" multiple hidden /></label
+          ><label class="button secondary folder-button"
+            >Choose model folder<input
+              id="model-folder"
+              type="file"
+              webkitdirectory
+              multiple
+              hidden /></label
+          ><label
+            >Model<select id="model-choice">
+              <option>No model selected</option>
+            </select></label
+          >
+          <div id="blender-help" class="notice" hidden>
+            <strong>Blender is not connected.</strong>
+            <p>
+              This .blend file needs Blender to extract its meshes.
+              <a href="https://www.blender.org/download/" target="_blank" rel="noopener"
+                >Install Blender</a
+              >, then double-click <b>Start Exporter.cmd</b> again. The launcher will detect Blender
+              and open the conversion page. If Blender is already installed, reopen the launcher to
+              connect.
+            </p>
+            <p id="bridge-detail"></p>
+          </div>
+          <label>Dancer name<input id="label" placeholder="My Dancer" maxlength="80" /></label
+          ><label
+            >借物表 / Credits<textarea
+              id="credits"
+              placeholder="Original creator / rights holder. Include an AIGC note for AI-generated models."
+              rows="3"
+              maxlength="8192"
+            ></textarea>
+          </label>
+          <details>
+            <summary>Advanced: bone mapping</summary>
+            <p>
+              Common MMD bone names are mapped automatically. For other rigs, choose a JSON map from
+              source names to DDR bone names. Blender uses its own rig mapping.
+            </p>
+            <input id="mapping" type="file" accept=".json" />
+          </details>
+          <div class="actions">
+            <button id="convert">Convert dancer</button
+            ><button id="cancel" class="secondary" hidden>Cancel Blender import</button>
+          </div>
+          <p id="status" role="status" aria-live="polite">Ready when you are.</p>
+          <details id="log-box" hidden>
+            <summary>Import details</summary>
+            <pre id="log"></pre>
+          </details>
+        </section>
+      </div>
+      <section class="card result">
+        <div class="result-heading">
+          <div>
+            <h2><span>03</span> Check the moves</h2>
+            <p>Same animation. Same camera. Drag to orbit; scroll to zoom.</p>
+          </div>
+          <button id="download" disabled>Download DDR dancer ZIP</button>
+        </div>
+        <div class="toolbar">
+          <label
+            >Reference<select id="reference">
+              <option value="miku">Original Hatsune Miku</option>
+              <option value="emi">Stock Emi</option>
+            </select></label
+          ><label
+            >Converted dancer<select id="dancer">
+              <option>No converted dancers yet</option>
+            </select></label
+          ><label
+            >Animation<select id="animation">
+              <option value="">Rest pose</option>
+            </select></label
+          ><button id="play" class="secondary">Pause</button
+          ><label
+            >Speed<select id="speed">
+              <option value="0.5">0.5×</option>
+              <option value="1" selected>1×</option>
+              <option value="2">2×</option>
+            </select></label
+          >
+        </div>
+        <div class="preview-labels">
+          <span id="reference-name">Original Hatsune Miku</span
+          ><span id="dancer-name">Your converted dancer</span>
+        </div>
+        <canvas id="preview"></canvas
+        ><input
+          id="seek"
+          type="range"
+          min="0"
+          max="1000"
+          value="0"
+          aria-label="Animation position"
+        />
+        <p id="preview-credit"></p>
+        <p class="muted">
+          Live preview of the exported model; game rendering may differ. Unzip the download and copy
+          its whole dancer folder into data_mods/custom_models/dancers/.
+        </p>
+      </section>
+      <footer>
+        Experimental conversion · cloth physics and facial animation are not transferred.<button
+          id="stop"
+          class="link"
+          hidden
+        >
+          Disconnect Blender service
+        </button>
+      </footer>
+    </main>
+  </body>
+</html>

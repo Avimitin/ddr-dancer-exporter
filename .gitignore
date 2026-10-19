@@ -12,6 +12,11 @@ htmlcov/
 *.egg-info/
 /build/
 /dist/
+/node_modules/
+/web/vendor/
+/web/app.bundle.js
+/web/app.bundle.js.map
+/runtime/
 
 # Local models, configurations, credits and generated per-dancer work
 /dancers/

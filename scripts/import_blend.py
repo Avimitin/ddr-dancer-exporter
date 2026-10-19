@@ -1,13 +1,11 @@
 """Blender rest mesh -> common exporter intermediate. Never saves the blend."""
 import sys
 from pathlib import Path
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-import _bootstrap  # Blender does not add the script directory to sys.path.
 import bpy,sys,json
 from pathlib import Path
 from collections import defaultdict
 args=sys.argv[sys.argv.index('--')+1:];name=args[args.index('--dancer')+1]
-root=Path(__file__).resolve().parents[1]/'dancers'/name
+root=Path(args[args.index('--workdir')+1]) if '--workdir' in args else Path(__file__).resolve().parents[1]/'dancers'/name
 config=json.loads((root/'dancer.json').read_text(encoding='utf8'))
 if not isinstance(config.get('credits'),str) or not config['credits'].strip():
     raise ValueError('Every converted input requires a non-empty credit / 借物表')
