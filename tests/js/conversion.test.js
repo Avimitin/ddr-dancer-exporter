@@ -9,6 +9,7 @@ import { parsePmx, registry } from '../../web/lib/adapters.js';
 import { parseMotion, pose } from '../../web/lib/motion.js';
 import { unzip, packageZip } from '../../web/lib/files.js';
 import { extractArc } from '../../web/lib/arc.js';
+import { inspectReferences } from '../../web/lib/references.js';
 import { zipSync } from 'fflate';
 test('ZIP reader normalizes Windows separators', () => {
   const bytes = zipSync({ 'folder\\texture.png': new Uint8Array([1]) });
@@ -17,6 +18,37 @@ test('ZIP reader normalizes Windows separators', () => {
 const root = fileURLToPath(new URL('../../', import.meta.url)),
   read = async (p) => new Uint8Array(await readFile(root + p)),
   json = async (p) => JSON.parse(await readFile(root + p, 'utf8'));
+test(
+  'references use file contents and matching sidecars, not character names',
+  { skip: !existsSync(root + 'dancers/template-miku/model/pl_miku00.model') },
+  async () => {
+    const assets = new Map();
+    for (const name of await readdir(root + 'dancers/template-miku/model')) {
+      assets.set(
+        name.replace('pl_miku00', 'pl_reference'),
+        await read('dancers/template-miku/model/' + name),
+      );
+    }
+    let ref = inspectReferences(assets)[0];
+    assert.equal(ref.name, 'pl_reference.model');
+    assert.equal(ref.ready, true);
+    const texture = ref.model.names[0],
+      bytes = assets.get(texture);
+    assets.delete(texture);
+    ref = inspectReferences(assets)[0];
+    assert.equal(ref.ready, false);
+    assert.deepEqual(ref.missingTextures, [texture]);
+    assets.set(texture, bytes);
+    assets.delete('pl_reference.b2it');
+    ref = inspectReferences(assets)[0];
+    assert.equal(ref.ready, false);
+    assert.deepEqual(ref.missingLookups, ['pl_reference.b2it']);
+    assets.set('pl_other.model', await read('dancers/stock-emi/model/pl_emi00.model'));
+    ref = inspectReferences(assets).find((r) => r.name === 'pl_other.model');
+    assert.ok(ref.model, 'Stock model remains available to the preview');
+    assert.equal(ref.compatible, false, 'Stock layout cannot bypass writer constraints');
+  },
+);
 test('adapters resolve formats and reject unknown inputs', () => {
   assert.equal(registry().resolve('A.PMX').id, 'pmx');
   assert.equal(registry().resolve('A.blend').id, 'blend');

@@ -25,6 +25,23 @@ only. Blender remains an optional installed application. The existing desktop
 Python scripts and MP4 viewer remain available for development and regression
 comparison; the new browser uses live GPU skinning rather than generating MP4s.
 
+## DDR reference discovery
+
+`web/lib/references.js` discovers uploaded `.model` files by extension and reads
+their contents. The conversion picker checks the supported writer layout and
+same-stem `.b2it`/`.grp2it` files, plus the texture names stored inside the model.
+It reports missing filenames without requiring users to inspect binary metadata.
+The writer still requires its existing 33-bone, nine-packet, five-texture layout
+with 48-byte vertices and a shared palette; generic filenames do not broaden
+that binary support.
+
+Comparison candidates are independent of writer compatibility. Readable body
+models are listed regardless of character name; separate face files are attached
+by matching basename. Animation skeleton compatibility is checked on selection.
+Original stock archives can be selected directly or extracted first. Uploaded
+DDR assets currently share a flat filename namespace; loading a file with an
+existing filename replaces that file.
+
 ## Adapter contract
 
 `web/lib/adapters.js` defines the registry and current adapters. An adapter has:

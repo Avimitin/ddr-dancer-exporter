@@ -55,15 +55,35 @@ def main():
             page.goto((ROOT / 'web/index.html').as_uri() + '#session=' + token)
             page.locator('#models').set_input_files(str(blend_zip))
             page.wait_for_function("document.querySelector('#blender-help').hidden === false")
-            assert 'Install Blender' in page.locator('#blender-help').inner_text()
+            assert 'install Blender' in page.locator('#blender-help').inner_text()
             assert page.locator('#convert').is_disabled()
             report['missing_blender_guidance'] = True
             reference = list((ROOT / 'dancers/template-miku/model').glob('*'))
-            reference += [ROOT / 'animations/archives/mc_female.arc']
-            reference += list((ROOT / 'dancers/stock-emi/model').glob('*'))
-            reference += list((ROOT / 'dancers/stock-emi/face').glob('*'))
-            page.locator('#assets').set_input_files([str(x) for x in reference if x.is_file()])
-            page.wait_for_function("document.querySelector('#asset-status').textContent.includes('template loaded')")
+            missing_texture = next(x for x in reference if x.suffix == '.dds')
+            page.locator('#assets').set_input_files([
+                {'name': x.name.replace('pl_miku00', 'pl_reference'), 'mimeType': 'application/octet-stream', 'buffer': x.read_bytes()}
+                for x in reference if x.is_file() and x != missing_texture
+            ])
+            page.wait_for_function("document.querySelector('#reference-checks').textContent.includes('Missing textures:')")
+            assert page.locator('#asset-status').get_attribute('data-ready') == 'false'
+            page.locator('#assets').set_input_files(str(missing_texture))
+            page.wait_for_function("document.querySelector('#asset-status').dataset.ready === 'true'")
+            assert page.locator('#template-choice').input_value() == 'pl_reference.model'
+            page.locator('#animations-upload').set_input_files(str(ROOT / 'animations/archives/mc_female.arc'))
+            page.wait_for_function("document.querySelector('#animation').options.length > 1")
+            stock = list((ROOT / 'dancers/stock-emi/model').glob('*')) + list((ROOT / 'dancers/stock-emi/face').glob('*'))
+            page.locator('#comparison-upload').set_input_files([
+                {'name': x.name.replace('pl_emi00', 'pl_stock_example'), 'mimeType': 'application/octet-stream', 'buffer': x.read_bytes()}
+                for x in stock if x.is_file()
+            ])
+            page.wait_for_function("document.querySelector('#reference').options.length > 1")
+            report['generic_references_and_missing_texture_guidance'] = True
+            source_box = page.locator('#drop').bounding_box()
+            reference_box = page.locator('#asset-drop').bounding_box()
+            assert abs(source_box['y'] - reference_box['y']) < 1
+            assert abs(source_box['height'] - reference_box['height']) < 1
+            assert abs(page.locator('.card.input').bounding_box()['height'] - page.locator('.card.setup').bounding_box()['height']) < 1
+            report['upload_panels_aligned'] = True
             page.locator('#models').set_input_files(str(pmx_zip))
             page.wait_for_function("document.querySelector('#model-choice').value.toLowerCase().endsWith('.pmx')")
             page.fill('#label', 'Tomorin JS test')
@@ -73,11 +93,11 @@ def main():
             assert 'Converted and validated' in page.locator('#status').inner_text(), page.locator('#status').inner_text()
             page.select_option('#animation', 'mc_female_ht01_exec.anm')
             page.wait_for_timeout(800)
-            page.select_option('#reference', 'emi')
+            page.select_option('#reference', 'pl_stock_example.model')
             assert 'Preview:' not in page.locator('#status').inner_text(), page.locator('#status').inner_text()
             page.wait_for_timeout(300)
             page.screenshot(path=str(OUT / 'stock-emi.png'), full_page=True)
-            page.select_option('#reference', 'miku')
+            page.select_option('#reference', '')
             page.screenshot(path=str(OUT / 'static-pmx.png'), full_page=True)
             with page.expect_download() as download:
                 page.click('#download')

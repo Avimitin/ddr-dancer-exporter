@@ -1,11 +1,12 @@
 import { registry } from './lib/adapters.js';
-import { assert } from './lib/binary.js';
+import { assert, table } from './lib/binary.js';
 import { exportModel } from './lib/exporter.js';
 import { readFiles, resolveFile, packageZip, unzip } from './lib/files.js';
 import { decodeImage, encodeDDS } from './lib/textures.js';
 import { parseKtmdl } from './lib/ktmdl.js';
 import { parseMotion } from './lib/motion.js';
 import { extractArc } from './lib/arc.js';
+import { findAsset, inspectReferences } from './lib/references.js';
 import { Comparison } from './preview.js';
 import { Matrix4, Vector3 } from 'three';
 const $ = (id) => document.getElementById(id),
@@ -18,6 +19,7 @@ let files = new Map(),
   session = new URLSearchParams(location.hash.slice(1)).get('session'),
   job = null,
   comparison = null,
+  references = [],
   busy = false;
 const bridgeURL = 'http://127.0.0.1:8765';
 const status = (text, error = false) => {
@@ -80,14 +82,61 @@ const asset = (name) => {
   return entry[1];
 };
 function refreshAssets() {
-  const ready = ['pl_miku00.model', 'pl_miku00.b2it', 'pl_miku00.grp2it'].every((n) =>
-    assets.has(n),
+  const selected = $('template-choice').value,
+    preview = $('reference').value;
+  references = inspectReferences(assets);
+  $('template-choice').replaceChildren(...references.map((r) => new Option(r.name, r.name)));
+  if (!references.length) $('template-choice').add(new Option('No DDR model loaded', ''));
+  $('template-choice').value = references.some((r) => r.name === selected)
+    ? selected
+    : (references.find((r) => r.ready) || references.find((r) => r.compatible) || references[0])
+        ?.name || '';
+  const template = references.find((r) => r.name === $('template-choice').value);
+  $('asset-status').dataset.ready = String(!!template?.ready);
+  $('asset-status').textContent = !template
+    ? 'Choose a DDR model folder to check its files.'
+    : template.ready
+      ? 'Conversion reference ready.'
+      : template.error || 'Add the missing files listed below.';
+  const checks = !template
+    ? [
+        'Needed: DDR .model',
+        'Needed: matching .b2it and .grp2it',
+        'Needed: referenced .dds textures',
+      ]
+    : [
+        template.model ? 'Model file: loaded' : 'Model file: unreadable',
+        template.missingLookups?.length
+          ? 'Missing lookup files: ' + template.missingLookups.join(', ')
+          : template.missingLookups
+            ? 'Lookup files: loaded'
+            : 'Lookup files: not checked',
+        template.missingTextures?.length
+          ? 'Missing textures: ' + template.missingTextures.join(', ')
+          : template.missingTextures
+            ? 'Textures: loaded'
+            : 'Textures: not checked',
+      ];
+  $('reference-checks').replaceChildren(
+    ...checks.map((text) => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      return li;
+    }),
   );
-  $('asset-status').textContent =
-    (ready ? 'DDR template loaded.' : 'DDR template still needed.') +
-    ' ' +
-    [...assets.keys()].filter((n) => /\.anm$/i.test(n)).length +
-    ' animations available.';
+  $('reference').replaceChildren(new Option('Conversion reference', ''));
+  const candidates = references.filter(
+    (r) => r.model && !/_face\d*\.model$/i.test(r.name) && r.name !== template?.name,
+  );
+  for (const r of candidates) $('reference').add(new Option(r.name, r.name));
+  $('reference').value = candidates.some((r) => r.name === preview) ? preview : '';
+  $('comparison-status').textContent = candidates.length
+    ? candidates.length + ' comparison model(s) available.'
+    : 'No additional comparison dancer loaded.';
+  const count = [...assets.keys()].filter((n) => /\.anm$/i.test(n)).length;
+  $('motion-status').textContent = count
+    ? count + ' animations available.'
+    : 'No animations loaded — rest pose only.';
   const current = $('animation').value;
   $('animation').replaceChildren(new Option('Rest pose', ''));
   for (const n of [...assets.keys()].filter((n) => /\.anm$/i.test(n)).sort())
@@ -107,20 +156,19 @@ async function loadAssets(list) {
   try {
     status('Loading DDR reference files…');
     const selected = [...list].filter((f) =>
-      /^(pl_miku00\.(model|b2it|grp2it)|mk_.*\.dds|pl_emi00.*\.(arc|model|b2it|grp2it)|mdx_emi.*\.dds|mc_.*\.(arc|anm)|.*\.zip)$/i.test(
-        f.name,
-      ),
+      /\.(model|b2it|grp2it|dds|arc|anm|zip)$/i.test(f.name),
     );
     assert(selected.length, 'No supported DDR reference files found');
     const input = await readFiles(selected);
     for (const [path, bytes] of input) {
       if (/\.arc$/i.test(path)) {
         for (const [n, b] of extractArc(bytes)) assets.set(n, b);
-      } else assets.set(path.split('/').pop(), bytes);
+      } else if (/\.(model|b2it|grp2it|dds|anm)$/i.test(path))
+        assets.set(path.split('/').pop(), bytes);
     }
     refreshAssets();
     await remember();
-    status('Reference files ready.');
+    status('Files loaded. Check the conversion reference and optional preview selections below.');
     if (dancers.length) showPreview();
   } catch (e) {
     status(e.message, true);
@@ -196,9 +244,13 @@ async function convert() {
       checkModel();
       throw new Error('Blender is not connected. Follow the installation instructions above.');
     }
-    const template = asset('pl_miku00.model'),
-      lookup = asset('pl_miku00.b2it'),
-      groups = asset('pl_miku00.grp2it');
+    const selected = references.find((r) => r.name === $('template-choice').value);
+    assert(selected, 'Choose a DDR conversion reference first');
+    assert(selected.compatible, selected.error);
+    assert(selected.ready, 'Missing reference files: ' + selected.missing.join(', '));
+    const template = asset(selected.name),
+      lookup = asset(selected.lookups[0]),
+      groups = asset(selected.lookups[1]);
     status('Importing ' + adapter.id + '…');
     await yieldUI();
     await remember();
@@ -266,18 +318,25 @@ function showPreview() {
   $('preview-credit').textContent = '借物表 — ' + dancer.name + '\n' + dancer.credits;
   $('dancer-name').textContent = dancer.name;
   try {
-    const miku = $('reference').value === 'miku',
-      name = miku ? 'pl_miku00.model' : 'pl_emi00.model',
+    const name = $('reference').value || $('template-choice').value,
       model = parseKtmdl(asset(name));
-    if (!miku && assets.has('pl_emi00_face01.model')) {
-      const face = parseKtmdl(asset('pl_emi00_face01.model')),
-        head = new Matrix4().fromArray(model.bones[16].matrix),
+    const stem = name.replace(/\.model$/i, ''),
+      faceName = [...assets.keys()]
+        .filter(
+          (n) => n.toLowerCase().startsWith(stem.toLowerCase() + '_face') && /\.model$/i.test(n),
+        )
+        .sort()[0],
+      lookup = findAsset(assets, stem + '.b2it'),
+      headIndex = lookup ? table(lookup).find((b) => b.name === 'Head')?.index : 16;
+    if (faceName && model.bones[headIndex]) {
+      const face = parseKtmdl(asset(faceName)),
+        head = new Matrix4().fromArray(model.bones[headIndex].matrix),
         offset = model.names.length;
       for (const p of face.packets) {
         p.texture += offset;
         for (const v of p.vertices) {
           v.position = new Vector3(...v.position).applyMatrix4(head).toArray();
-          v.ids = [16, 16, 16, 16];
+          v.ids = [headIndex, headIndex, headIndex, headIndex];
           v.weights = [1, 0, 0, 0];
         }
         model.packets.push(p);
@@ -285,7 +344,7 @@ function showPreview() {
       model.names.push(...face.names);
     }
     const reference = { model, textures: new Map(model.names.map((n) => [n, asset(n)])) };
-    $('reference-name').textContent = miku ? 'Original Hatsune Miku' : 'Stock Emi';
+    $('reference-name').textContent = $('reference').value ? name : 'Conversion reference';
     comparison ||= new Comparison($('preview'));
     comparison.set(reference, dancer);
     selectAnimation();
@@ -349,6 +408,7 @@ async function remember() {
           mapping,
           label: $('label').value,
           credits: $('credits').value,
+          template: $('template-choice').value,
         },
         'latest',
       );
@@ -377,12 +437,24 @@ async function restore() {
       $('credits').value = saved.credits;
       $('model-choice').replaceChildren(...adapters.models(files).map((n) => new Option(n, n)));
       refreshAssets();
+      if (references.some((r) => r.name === saved.template)) {
+        $('template-choice').value = saved.template;
+        refreshAssets();
+      }
     }
   } catch {}
   checkModel();
 }
 $('assets').onchange = (e) => loadAssets(e.target.files);
 $('assets-folder').onchange = (e) => loadAssets(e.target.files);
+$('animations-upload').onchange = (e) => loadAssets(e.target.files);
+$('comparison-upload').onchange = (e) => loadAssets(e.target.files);
+$('comparison-folder').onchange = (e) => loadAssets(e.target.files);
+$('template-choice').onchange = () => {
+  refreshAssets();
+  remember();
+  showPreview();
+};
 $('models').onchange = (e) => chooseModels(e.target.files);
 $('model-folder').onchange = (e) => chooseModels(e.target.files);
 $('model-choice').onchange = checkModel;
@@ -400,6 +472,22 @@ $('drop').onkeydown = (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     $('models').click();
+  }
+};
+$('asset-drop').ondragover = (e) => {
+  e.preventDefault();
+  $('asset-drop').classList.add('over');
+};
+$('asset-drop').ondragleave = () => $('asset-drop').classList.remove('over');
+$('asset-drop').ondrop = (e) => {
+  e.preventDefault();
+  $('asset-drop').classList.remove('over');
+  loadAssets(e.dataTransfer.files);
+};
+$('asset-drop').onkeydown = (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    $('assets').click();
   }
 };
 $('mapping').onchange = async (e) => {

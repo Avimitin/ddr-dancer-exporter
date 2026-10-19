@@ -168,7 +168,7 @@ export function exportModel(model, template, lookup, options = {}) {
     palette = ref.packets[0].palette;
   assert(
     h.boneCount === 33 && h.packetCount === 9 && ref.names.length === 5,
-    'Use the supported Miku DDR template (33 bones, 9 packets, 5 textures).',
+    'This DDR model cannot be used for conversion. Choose a compatible DDR dancer package.',
   );
   assert(
     ref.packets.every(

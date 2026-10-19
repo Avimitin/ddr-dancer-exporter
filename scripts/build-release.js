@@ -23,6 +23,7 @@ const files = [
   'web/lib/files.js',
   'web/lib/textures.js',
   'web/lib/arc.js',
+  'web/lib/references.js',
   'service/blender_bridge.py',
   'scripts/import_blend.py',
   'scripts/build-web.js',
